@@ -1,0 +1,105 @@
+{% extends 'pr_agent/base.html' %}
+
+{% block title %}PR Review History{% endblock %}
+
+{% block content %}
+<div class="glass-card shadow-xl rounded-xl overflow-hidden">
+    <div class="gradient-bg px-6 py-4">
+        <h2 class="text-2xl font-bold text-white">Pull Request History</h2>
+        <p class="text-gray-200 mt-1">Review past analyses and their results</p>
+    </div>
+
+    <div class="divide-y divide-gray-200">
+        {% if prs %}
+            <ul class="divide-y divide-gray-200">
+                {% for pr in prs %}
+                    <li class="hover:bg-gray-50 transition-colors duration-150">
+                        <div class="px-6 py-5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center space-x-3">
+                                        <h3 class="text-lg font-semibold text-gray-900 truncate">
+                                            <a href="{{ pr.pr_link }}" class="hover:text-indigo-600 transition-colors duration-150" target="_blank">
+                                                PR #{{ pr.id }}
+                                            </a>
+                                        </h3>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                            {% if pr.status == 'Approved' %}bg-green-100 text-green-800
+                                            {% elif pr.status == 'Rejected' %}bg-red-100 text-red-800
+                                            {% elif pr.status == 'Pending' %}bg-yellow-100 text-yellow-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ pr.status }}
+                                        </span>
+                                    </div>
+                                    <div class="mt-1 flex items-center space-x-2 text-sm text-gray-500">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span>{{ pr.created_at|date:"M d, Y H:i" }}</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 space-y-2">
+                                    <button onclick="toggleFeedback('feedback-{{ pr.id }}')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
+                                        <svg class="h-4 w-4 mr-2 feedback-icon-{{ pr.id }} transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                        View Details
+                                    </button>
+                                    <a href="{% url 'delete_pr' pr.id %}" 
+   class="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200">
+    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+    Delete
+</a>
+
+                                </div>
+                            </div>
+                            <div id="feedback-{{ pr.id }}" class="hidden mt-4">
+                                <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Review Feedback:</h4>
+                                    <div class="text-sm text-gray-700 feedback-content">
+                                        {{ pr.feedback|linebreaksbr }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="px-6 py-12 text-center">
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No pull requests</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by submitting your first pull request for review.</p>
+                <div class="mt-6">
+                    <a href="{% url 'submit_pr' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Submit New PR
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .feedback-content {
+        white-space: nowrap;
+        overflow-x: auto;
+        text-overflow: ellipsis;
+        padding-bottom: 4px;
+    }
+</style>
+
+<script>
+    function toggleFeedback(id) {
+        const feedbackSection = document.getElementById(id);
+        const icon = document.querySelector(`.feedback-icon-${id.split('-')[1]}`);
+        feedbackSection.classList.toggle('hidden');
+        feedbackSection.classList.toggle('block');
+        icon.style.transform = feedbackSection.classList.contains('hidden') ? "rotate(0deg)" : "rotate(180deg)";
+    }
+</script>
+{% endblock %}
