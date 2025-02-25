@@ -1,33 +1,85 @@
-# PR Analysis Agent
+# PR Analysis Tool
 
-AI-powered GitHub pull request analysis and automated code review system.
+An AI-powered Pull Request analysis and auto-merge tool for GitHub repositories.
+
+## Overview
+
+This Django application automates the code review process for GitHub Pull Requests by:
+
+1. Fetching complete file data from PRs
+2. Analyzing code changes using LLM (Ollama models)
+3. Providing quality assessment and security reviews
+4. Auto-merging PRs that meet quality criteria
 
 ## Features
 
-- Automated PR analysis using Llama-3 via Ollama
-- Merge requirement checks (CI status, reviews, conflicts)
-- Security vulnerability detection
-- Code quality assessment
-- Historical analysis tracking
-- Auto-merge capability for approved PRs
+- **Comprehensive Code Analysis**: Fetches and analyzes both the full file content and specific diffs
+- **Security Scanning**: Identifies potential security issues in changed files
+- **Quality Scoring**: Rates code quality on a 10-point scale
+- **Safe Auto-Merge**: Creates backup references before attempting to merge
+- **Breaking Change Detection**: Identifies potential breaking changes
+- **Test Coverage Analysis**: Evaluates the presence of tests related to changes
 
-## Installation
+## Requirements
 
-1. **Prerequisites**:
-   - Python 3.9+
-   - Django 4.2+
-   - GitHub API token
-   - Ollama server running Llama-3
+- Python 3.8+
+- Django 3.2+
+- PyGithub
+- Ollama (with supported models)
 
-2. **Setup**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   
-  settings.py
-GITHUB_TOKEN = 'your_github_pat'
-OLLAMA_HOST = 'http://localhost:11434'
+## Setup
 
-Run 
-python manage.py runserver
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Configure your GitHub token in settings:
+   ```python
+   # settings.py
+   GITHUB_TOKEN = 'your_github_token'
+   ```
+4. Run migrations: `python manage.py migrate`
+5. Start the server: `python manage.py runserver`
+
+## Usage
+
+1. Navigate to the homepage
+2. Enter the GitHub repository URL and Pull Request link
+3. Submit the form to start the analysis
+4. Review the automated feedback and merge status
+
+## Supported Models
+
+The tool attempts to use the following models in order:
+- llama2
+- llama2:7b-code
+- codellama:7b
+- mistral:7b
+- llama2:7b
+
+## Configuration
+
+You can adjust the analysis thresholds in the code:
+- Quality score threshold for auto-merge: 5.0
+- Security issues that block merging: "critical" or "severe"
+
+## Architecture
+
+- **fetch_pr_details**: Retrieves basic PR information
+- **fetch_file_content**: Gets full content of files from both branches
+- **analyze_code_changes**: Performs basic static analysis of changes
+- **analyze_code_with_llama**: Uses LLM to analyze code quality and issues
+- **handle_pr_merge**: Safely attempts to merge qualifying PRs
+
+## Safety Features
+
+- Creates backup references before any merge operation
+- Syncs PR with base branch to prevent merge conflicts
+- Validates mergeability before attempting merge
+- Comprehensive error handling and logging
+
+## License
+
+MIT License
+
+## Contributing
+
+Contributions welcome! Please feel free to submit a Pull Request.
